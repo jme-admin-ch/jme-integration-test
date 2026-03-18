@@ -1,8 +1,8 @@
 publiccodeYmlVersion: 0.4.0
 name: jme-cdct-provider-example
 applicationSuite: JME
-softwareVersion: 2.2.1
-releaseDate: 2026-03-19
+softwareVersion: 0.0.1
+releaseDate: 2026-03-18
 url: "https://github.com/jme-admin-ch/jme-cdct-provider-example.git"
 landingURL: "https://github.com/jme-admin-ch/jme"
 platforms:
