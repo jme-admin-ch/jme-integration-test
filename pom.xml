@@ -25,10 +25,9 @@
     </licenses>
 
     <parent>
+        <artifactId>jeap-internal-spring-boot-parent</artifactId>
         <groupId>ch.admin.bit.jeap</groupId>
-        <artifactId>jeap-spring-boot-parent</artifactId>
-        <version>31.2.0</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <version>5.19.3</version>
     </parent>
 
     <properties>
@@ -37,9 +36,15 @@
         <maven.javadoc.skip>false</maven.javadoc.skip>
     </properties>
 
+    <groupId>ch.admin.bit.jeap.jme</groupId>
     <artifactId>jme-integration-test</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>jme-spring-boot-integration-test</module>
+        <module>jme-spring-boot-integration-test-it</module>
+    </modules>
 
     <build>
         <pluginManagement>

@@ -1,0 +1,10 @@
+services:
+  nginx:
+    # Do not expose any ports to the host machine during CI testing
+    ports: !reset [ ]
+
+networks:
+  default:
+    external: true
+    # Network is created by the CI job and includes the test runner & the containers started by this compose file
+    name: ${COMPOSE_PROJECT_NAME}_default

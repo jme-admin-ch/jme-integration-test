@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: jme-it
+  main:
+    banner-mode: off
+
+
+server:
+  servlet:
+    context-path: /jme-it
+  port: 8082
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true

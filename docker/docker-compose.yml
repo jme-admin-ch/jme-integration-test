@@ -1,0 +1,7 @@
+services:
+  nginx:
+    image: nginx:1.29-alpine
+    ports:
+      - "8181:80"
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html:ro
