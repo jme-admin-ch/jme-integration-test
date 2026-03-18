@@ -1,0 +1,41 @@
+publiccodeYmlVersion: 0.4.0
+name: jme-cdct-provider-example
+applicationSuite: JME
+softwareVersion: 2.2.1
+releaseDate: 2026-03-19
+url: "https://github.com/jme-admin-ch/jme-cdct-provider-example.git"
+landingURL: "https://github.com/jme-admin-ch/jme"
+platforms:
+  - web
+categories:
+  - application-development
+developmentStatus: stable
+softwareType: standalone/web
+organisation:
+  uri: https://ld.admin.ch/office/V.1.7
+  name: Federal Office of Information Technology, Systems and Telecommunication
+description:
+  en:
+    localisedName: jme-cdct-provider-example
+    shortDescription: jEAP microservice example demonstrating consumer-driven contract testing with Pact in a provider.
+    longDescription: >
+      The jme-cdct-provider-example is a jEAP microservice example. It demonstrates consumer-driven contract testing
+      with Pact in a provider. The example includes a test that retrieves all relevant pacts from a Pact Broker and
+      verifies them against the provider implementation. This test checks if the provider meets all expectations
+      defined by its consumers and reports the verification results back to the Pact Broker.
+    features:
+      - Run provider verification tests
+      - Fetch pacts from a Pact Broker
+      - Verify the provider implementation against the pacts
+      - Publish verification results back to the Pact Broker
+legal:
+  license: Apache-2.0
+maintenance:
+  type: internal
+  contacts:
+    - name: Federal Office of Information Technology, Systems and Telecommunication FOITT
+      email: jeap-community@bit.admin.ch
+localisation:
+  localisationReady: false
+  availableLanguages:
+    - en
