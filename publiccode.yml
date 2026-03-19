@@ -1,33 +1,48 @@
-publiccodeYmlVersion: 0.4.0
-name: jme-cdct-provider-example
+publiccodeYmlVersion: 0.5.0
+name: jme-integration-test
 applicationSuite: JME
 softwareVersion: 1.0.0
 releaseDate: 2026-03-19
-url: "https://github.com/jme-admin-ch/jme-cdct-provider-example.git"
+url: "https://github.com/jme-admin-ch/jme-integration-test.git"
 landingURL: "https://github.com/jme-admin-ch/jme"
 platforms:
   - web
 categories:
   - application-development
 developmentStatus: stable
-softwareType: standalone/web
+softwareType: library
 organisation:
   uri: https://ld.admin.ch/office/V.1.7
   name: Federal Office of Information Technology, Systems and Telecommunication
 description:
   en:
-    localisedName: jme-cdct-provider-example
-    shortDescription: jEAP microservice example demonstrating consumer-driven contract testing with Pact in a provider.
+    localisedName: jme-integration-test
+    shortDescription: jEAP microservice example integration test support library, providing a re-usable test harness for JME examples
     longDescription: >
-      The jme-cdct-provider-example is a jEAP microservice example. It demonstrates consumer-driven contract testing
-      with Pact in a provider. The example includes a test that retrieves all relevant pacts from a Pact Broker and
-      verifies them against the provider implementation. This test checks if the provider meets all expectations
-      defined by its consumers and reports the verification results back to the Pact Broker.
+      The jme-integration-test library provides base classes and utilities for writing integration tests that start
+      and manage Spring Boot services via Maven. It is part of the jEAP ecosystem. When testing jEAP Microservice
+      Examples, there is often the need to start one or more Spring Boot example apps, wait for them to become
+      healthy, and then run assertions against their APIs. This library handles all the boilerplate: process
+      lifecycle management, health check polling, Spring profile resolution, and OAuth2 token fetching.
+
+      The library offers two base classes: BootServiceSpringIntegrationTestBase for tests that need a Spring
+      application context, and BootServiceIntegrationTestBase for tests without one. Services are started via
+      startService(moduleName, baseUrl), which launches the module using mvnw spring-boot:run and waits for its
+      health endpoint to return 200. All started services including child processes are automatically destroyed
+      after tests complete.
+
+      The library also supports Spring Boot's Docker Compose integration. On CI, a docker-compose-ci.yml overlay
+      resets port mappings and uses an external Docker network so that the test runner container and all compose
+      services share the same network. The ci Spring profile is automatically activated when the CI environment
+      variable is set, requiring no manual profile configuration on CI.
     features:
-      - Run provider verification tests
-      - Fetch pacts from a Pact Broker
-      - Verify the provider implementation against the pacts
-      - Publish verification results back to the Pact Broker
+      - Service startup and lifecycle management via Maven spring-boot:run with health check polling
+      - Automatic cleanup of all started services including child processes after tests complete
+      - Spring profile resolution with automatic CI profile activation
+      - OAuth2 access token fetching via client credentials flow
+      - Awaitility defaults with 60-second timeout and 1-second polling interval
+      - Docker Compose integration support with CI overlay for shared Docker networks
+      - Base classes for tests with or without a Spring application context
 legal:
   license: Apache-2.0
 maintenance:
