@@ -17,6 +17,7 @@
 
     <groupId>ch.admin.bit.jeap.jme</groupId>
     <artifactId>jme-spring-boot-integration-test-it</artifactId>
+    <name>${project.groupId}:${project.artifactId}</name>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
