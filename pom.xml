@@ -27,7 +27,7 @@
     <parent>
         <artifactId>jeap-internal-spring-boot-parent</artifactId>
         <groupId>ch.admin.bit.jeap</groupId>
-        <version>5.19.3</version>
+        <version>5.19.4</version>
     </parent>
 
     <properties>
@@ -38,7 +38,7 @@
 
     <groupId>ch.admin.bit.jeap.jme</groupId>
     <artifactId>jme-integration-test</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
