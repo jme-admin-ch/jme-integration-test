@@ -11,7 +11,7 @@ import static io.restassured.RestAssured.given;
 
 @Slf4j
 @SuppressWarnings("unchecked")
-public class TestHarnessIT extends BootServiceSpringIntegrationTestBase {
+class TestHarnessIT extends BootServiceSpringIntegrationTestBase {
 
     private static final String APP_BASE_URL = "http://localhost:8082/jme-it";
 

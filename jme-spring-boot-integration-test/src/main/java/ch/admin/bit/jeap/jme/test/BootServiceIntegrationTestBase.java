@@ -3,6 +3,7 @@ package ch.admin.bit.jeap.jme.test;
 import io.restassured.http.ContentType;
 import lombok.extern.slf4j.Slf4j;
 import org.awaitility.Awaitility;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
@@ -30,8 +31,19 @@ import static org.awaitility.Awaitility.await;
 @Slf4j
 public abstract class BootServiceIntegrationTestBase {
 
-    private static final Path PROJECT_ROOT = Path.of("").toAbsolutePath().getParent();
+    private static final Path PROJECT_ROOT = getProjectRoot();
     private static final String MVN = PROJECT_ROOT.resolve("mvnw").toString();
+    private static final String DEFAULT = "default";
+
+    private static @NonNull Path getProjectRoot() {
+        Path currentPath = Path.of("").toAbsolutePath();
+        if (currentPath.resolve("mvnw").toFile().exists()) {
+            return currentPath;
+        } else {
+            return currentPath.getParent();
+        }
+    }
+
     private static final Duration SERVICE_STARTUP_TIMEOUT = Duration.ofMinutes(3);
 
     private static final List<Process> startedServices = new ArrayList<>();
@@ -50,12 +62,16 @@ public abstract class BootServiceIntegrationTestBase {
     }
 
     protected static void startService(String moduleName, String baseUrl) throws IOException {
-        log.info("Starting {}...", moduleName);
+        log.info("Starting {}...", moduleName != null ? moduleName : DEFAULT);
         Process process = startMavenService(moduleName, TestProfileResolver.profile());
         startedServices.addFirst(process);
         var healthUrl = baseUrl + "/actuator/health/readiness";
         waitForService(healthUrl, SERVICE_STARTUP_TIMEOUT);
-        log.info("{} is ready.", moduleName);
+        log.info("{} is ready.", moduleName != null ? moduleName : DEFAULT);
+    }
+
+    protected static void startService(String baseUrl) throws IOException {
+        startService(null, baseUrl);
     }
 
     private static Process startMavenService(String moduleName, String springProfile) throws IOException {
@@ -66,10 +82,14 @@ public abstract class BootServiceIntegrationTestBase {
             cmds.add("-s");
             cmds.add("settings.xml");
         }
+
         cmds.addAll(List.of(
-                "--projects", moduleName,
                 "spring-boot:run",
                 "-Dspring-boot.run.profiles=" + springProfile));
+
+        if (moduleName != null) {
+            cmds.addAll(List.of("--projects", moduleName));
+        }
 
         ProcessBuilder pb = new ProcessBuilder(cmds);
         pb.directory(PROJECT_ROOT.toFile());
@@ -77,7 +97,7 @@ public abstract class BootServiceIntegrationTestBase {
         pb.redirectErrorStream(true);
         Process process = pb.start();
 
-        Thread outputThread = createStdIoCopyThread(moduleName, process);
+        Thread outputThread = createStdIoCopyThread(moduleName != null ? moduleName : DEFAULT, process);
         outputThread.start();
 
         return process;
@@ -125,10 +145,10 @@ public abstract class BootServiceIntegrationTestBase {
 
     private static void stopProcessTree(Process process) {
         process.descendants().forEach(processHandle -> {
-            log.info("Stopping child process " + processHandle.pid());
+            log.info("Stopping child process {}", processHandle.pid());
             processHandle.destroyForcibly();
         });
-        log.info("Stopping process " + process.pid());
+        log.info("Stopping process {}", process.pid());
         process.destroyForcibly();
     }
 
