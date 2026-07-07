@@ -12,12 +12,16 @@ import org.springframework.test.context.ActiveProfilesResolver;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
+import java.net.ServerSocket;
 import java.net.URI;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
 import static org.awaitility.Awaitility.await;
@@ -62,19 +66,64 @@ public abstract class BootServiceIntegrationTestBase {
     }
 
     protected static void startService(String moduleName, String baseUrl) throws IOException {
-        log.info("Starting {}...", moduleName != null ? moduleName : DEFAULT);
-        Process process = startMavenService(moduleName, TestProfileResolver.profile());
-        startedServices.addFirst(process);
-        var healthUrl = baseUrl + "/actuator/health/readiness";
-        waitForService(healthUrl, SERVICE_STARTUP_TIMEOUT);
-        log.info("{} is ready.", moduleName != null ? moduleName : DEFAULT);
+        startService(moduleName, baseUrl, Map.of());
     }
 
     protected static void startService(String baseUrl) throws IOException {
         startService(null, baseUrl);
     }
 
-    private static Process startMavenService(String moduleName, String springProfile) throws IOException {
+    /**
+     * Starts a service with additional configuration property overrides. The properties are passed to the forked
+     * service JVM as system properties and therefore take precedence over the properties in the service's
+     * configuration files. Use this e.g. to start services on reserved free ports (see {@link #reserveFreePorts(int)})
+     * and to point the services at each other's dynamically assigned URLs:
+     * {@code startService("my-module", baseUrl, Map.of("server.port", port, "peerService.url", peerUrl))}.
+     *
+     * @param moduleName              name of the maven module to start, or {@code null} for a project without modules
+     * @param baseUrl                 base URL of the service, used to poll the readiness health endpoint
+     * @param configurationProperties configuration properties to override in the started service
+     */
+    protected static void startService(String moduleName, String baseUrl, Map<String, String> configurationProperties)
+            throws IOException {
+        log.info("Starting {}...", moduleName != null ? moduleName : DEFAULT);
+        Process process = startMavenService(moduleName, TestProfileResolver.profile(), configurationProperties);
+        startedServices.addFirst(process);
+        var healthUrl = baseUrl + "/actuator/health/readiness";
+        waitForService(healthUrl, SERVICE_STARTUP_TIMEOUT);
+        log.info("{} is ready.", moduleName != null ? moduleName : DEFAULT);
+    }
+
+    /**
+     * Reserves free TCP ports for starting services on ports that are not in use, avoiding conflicts with other
+     * services running on the machine. The ports are only reserved momentarily while this method runs, so there is a
+     * small chance of another process claiming a returned port before the service starts.
+     *
+     * @param count number of distinct free ports to reserve
+     * @return the reserved free ports
+     */
+    protected static List<Integer> reserveFreePorts(int count) {
+        List<ServerSocket> sockets = new ArrayList<>();
+        try {
+            for (int i = 0; i < count; i++) {
+                sockets.add(new ServerSocket(0));
+            }
+            return sockets.stream().map(ServerSocket::getLocalPort).toList();
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to reserve free ports", e);
+        } finally {
+            for (ServerSocket socket : sockets) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    log.warn("Failed to close port reservation socket", e);
+                }
+            }
+        }
+    }
+
+    private static Process startMavenService(String moduleName, String springProfile,
+                                             Map<String, String> configurationProperties) throws IOException {
         List<String> cmds = new ArrayList<>();
         cmds.add(MVN);
         if (TestProfileResolver.isCI()) {
@@ -86,6 +135,13 @@ public abstract class BootServiceIntegrationTestBase {
         cmds.addAll(List.of(
                 "spring-boot:run",
                 "-Dspring-boot.run.profiles=" + springProfile));
+
+        if (!configurationProperties.isEmpty()) {
+            String jvmArguments = configurationProperties.entrySet().stream()
+                    .map(entry -> "\"-D" + entry.getKey() + "=" + entry.getValue() + "\"")
+                    .collect(Collectors.joining(" "));
+            cmds.add("-Dspring-boot.run.jvmArguments=" + jvmArguments);
+        }
 
         if (moduleName != null) {
             cmds.addAll(List.of("--projects", moduleName));

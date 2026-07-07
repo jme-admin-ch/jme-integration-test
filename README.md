@@ -75,11 +75,37 @@ If you don't need a Spring application context in your test, extend `BootService
 
 - **Service startup** via `startService(moduleName, baseUrl)` -- launches the module using `mvnw spring-boot:run` and
   waits for its health endpoint to return 200 (up to 3 minutes).
+- **Configuration property overrides** via `startService(moduleName, baseUrl, configurationProperties)` -- passes the
+  given properties to the started service as system properties, taking precedence over the service's configuration
+  files.
+- **Free port reservation** via `reserveFreePorts(count)` -- reserves distinct free TCP ports, e.g. to start services
+  on random ports instead of the fixed ports configured in their configuration files.
 - **Automatic cleanup** -- all started services (including child processes) are destroyed after tests complete.
 - **Profile resolution** -- automatically activates the `ci` profile when the `CI` environment variable is set.
 - **OAuth2 token fetching** -- `fetchAccessToken(authBaseUrl, clientId, secret)` retrieves an access token via the
   client credentials flow.
 - **Awaitility defaults** -- 60-second timeout with 1-second polling interval for `await()` assertions.
+
+### Starting Services on Random Ports
+
+Services configured with fixed ports can be started on reserved free ports to avoid conflicts with other processes,
+e.g. with instances of the services started manually. Reserve a free port per service, then override each service's
+`server.port` and the URLs the services use to call each other:
+
+```java
+private static final List<Integer> PORTS = reserveFreePorts(2);
+private static final String APP_BASE_URL = "http://localhost:" + PORTS.get(0) + "/my-app";
+private static final String PEER_BASE_URL = "http://localhost:" + PORTS.get(1) + "/my-peer";
+
+@BeforeAll
+static void startServices() throws Exception {
+    startService("my-peer-module", PEER_BASE_URL, Map.of(
+            "server.port", String.valueOf(PORTS.get(1))));
+    startService("my-app-module", APP_BASE_URL, Map.of(
+            "server.port", String.valueOf(PORTS.get(0)),
+            "peerService.url", PEER_BASE_URL));
+}
+```
 
 ### Docker Compose Support
 
