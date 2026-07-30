@@ -12,4 +12,6 @@ jobs:
       maven-args: '--batch-mode install'
       triggered-manually: ${{ github.event_name == 'workflow_dispatch' }}
     permissions:
-      contents: write
+      contents: read
+      issues: write
+      pull-requests: write
