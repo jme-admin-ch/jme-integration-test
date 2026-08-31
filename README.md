@@ -9,6 +9,21 @@ When testing jEAP Microservice Examples, there is often the need to start one or
 them to become healthy, and then run assertions against their APIs. This library handles all the boilerplate: process
 lifecycle management, health check polling, Spring profile resolution, and OAuth2 token fetching.
 
+## Test Strategy
+
+The OSS variants of the JME Examples are not deployed, so they are tested against their
+`local` profile configuration in the CI pipeline. This also gives high confidence in the
+quality of the examples when automated dependency updates are applied.
+
+Examples come in different flavours, each with its own test strategy:
+
+| Example structure                                        | Test strategy                                                                                                                                                                                                                          |
+|----------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Single module, with a Docker Compose infrastructure file | Use `jme-integration-test` with a Spring context and Docker Compose in the test. Add the integration test under `src/test/java`.                                                                                                          |
+| Single module, without Docker Compose                    | Use `jme-integration-test` without a Spring context in the test. Add the integration test under `src/test/java`.                                                                                                                          |
+| Multi-module, with a Docker Compose infrastructure file  | Use `jme-integration-test` with a Spring context and Docker Compose in the test. Create a separate test module and enable Spring Docker Compose in it. The test support then runs the Spring applications from the other modules via `mvn spring-boot:run`. |
+| Multi-module, without Docker Compose                     | Use `jme-integration-test` with a Spring context in the test. Create a separate test module. The test support then runs the Spring applications from the other modules via `mvn spring-boot:run`.                                          |
+
 ## Modules
 
 | Module                                | Description                                  |
