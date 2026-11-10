@@ -1,8 +1,8 @@
 publiccodeYmlVersion: 0.5.0
 name: jme-integration-test
 applicationSuite: JME
-softwareVersion: 8.8.0
-releaseDate: 2026-11-04
+softwareVersion: 8.9.0
+releaseDate: 2026-11-10
 url: "https://github.com/jme-admin-ch/jme-integration-test.git"
 landingURL: "https://github.com/jme-admin-ch/jme"
 platforms:
